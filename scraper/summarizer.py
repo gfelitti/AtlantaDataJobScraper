@@ -38,6 +38,11 @@ def summarize(title: str, company: str, description: str) -> str | None:
             )}],
         )
         text = msg.content[0].text.strip()
+        if text.startswith("```"):
+            text = text.split("```", 2)[1]
+            if text.startswith("json"):
+                text = text[4:]
+            text = text.strip()
         json.loads(text)  # validate — raises if invalid
         return text
     except Exception:
