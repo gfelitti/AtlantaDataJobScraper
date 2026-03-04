@@ -98,7 +98,7 @@ def upsert_jobs_batch(conn: sqlite3.Connection, jobs: list[dict]) -> dict:
 
     conn.executemany(
         """
-        INSERT INTO jobs (company, job_id, title, location, url, posted_date, scraped_at, is_active)
+        INSERT OR IGNORE INTO jobs (company, job_id, title, location, url, posted_date, scraped_at, is_active)
         VALUES (:company, :job_id, :title, :location, :url, :posted_date, :scraped_at, 1)
         """,
         [{**j, "scraped_at": now} for j in to_insert],
