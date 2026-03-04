@@ -24,7 +24,6 @@ from bs4 import BeautifulSoup
 logger = logging.getLogger(__name__)
 
 TIMEOUT = 30
-ICIMS_SEARCH = "https://careers-ice.icims.com/jobs/search"
 
 _HEADERS = {
     "User-Agent": (
@@ -48,7 +47,7 @@ def _make_session(main_url: str) -> requests.Session:
     return session
 
 
-def _parse_icims(html: str, company_name: str) -> list[dict]:
+def _parse_icims(html: str, company_name: str, base_url: str = "") -> list[dict]:
     soup = BeautifulSoup(html, "lxml")
     jobs = []
 
@@ -68,7 +67,8 @@ def _parse_icims(html: str, company_name: str) -> list[dict]:
             job_id = ""
 
         href = link_tag.get("href", "")
-        full_url = href if href.startswith("http") else f"https://careers-ice.icims.com{href}"
+        origin = "/".join(base_url.split("/")[:3]) if base_url else "https://careers-ice.icims.com"
+        full_url = href if href.startswith("http") else f"{origin}{href}"
 
         if not job_id and href:
             id_match2 = re.search(r"/jobs/(\d+)/", href)
@@ -118,15 +118,15 @@ def _is_js_wall(html: str) -> bool:
 def scrape(company: dict, search_text: str = "data") -> Iterator[dict]:
     """Yield normalized job dicts for an iCIMS company."""
     company_name = company["name"]
-    main_url = company["base_url"]
+    search_url = company["base_url"]
 
-    session = _make_session(main_url)
+    session = _make_session(search_url)
     page = 0
 
     while True:
         try:
             resp = session.get(
-                ICIMS_SEARCH,
+                search_url,
                 params={"ss": 1, "searchKeyword": search_text, "in_iframe": 1, "pr": page},
                 timeout=TIMEOUT,
             )
@@ -144,7 +144,7 @@ def scrape(company: dict, search_text: str = "data") -> Iterator[dict]:
             )
             break
 
-        jobs = _parse_icims(html, company_name)
+        jobs = _parse_icims(html, company_name, search_url)
         logger.debug("[%s] page=%d parsed=%d jobs", company_name, page, len(jobs))
 
         if not jobs:

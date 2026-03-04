@@ -58,25 +58,21 @@ COMPANIES: list[dict] = [
         "wday_suffix": "wd1",
         "site": "Careers",
     },
-    {
-        "name": "Chick-fil-A",
-        "ats": "workday",
-        "tenant": "cfa",
-        "wday_suffix": "wd5",
-        # NOTE: "Assignments" is the only confirmed public Workday site for CFA.
-        # It may be scoped to Field Talent Staff postings, not corporate roles.
-        "site": "Assignments",
-    },
-    # ── Avature ──────────────────────────────────────────────────────────
+    # ── Avature (Playwright) ─────────────────────────────────────────────
     {
         "name": "Delta",
-        "ats": "avature",
+        "ats": "avature_playwright",
         "base_url": "https://delta.avature.net/en_US/careers/SearchJobs",
     },
-    # ── Generic (iCIMS) ──────────────────────────────────────────────────
+    # ── iCIMS (Playwright) ───────────────────────────────────────────────
+    {
+        "name": "Chick-fil-A",
+        "ats": "icims_playwright",
+        "base_url": "https://careers-chickfila.icims.com/jobs/search",
+    },
     {
         "name": "ICE",
-        "ats": "generic",
-        "base_url": "https://careers.ice.com/jobs",
+        "ats": "icims_playwright",
+        "base_url": "https://careers-ice.icims.com/jobs/search",
     },
 ]

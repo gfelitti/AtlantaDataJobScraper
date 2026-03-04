@@ -20,8 +20,10 @@ from .filters import is_atlanta, is_data_role
 
 logger = logging.getLogger(__name__)
 
+PLAYWRIGHT_ATS = {"icims_playwright", "avature_playwright"}
 
-def _scrape_company(company: dict) -> list[dict]:
+
+def _scrape_company(company: dict, browser=None) -> list[dict]:
     """Route to the right scraper and return all matching jobs."""
     ats = company["ats"]
 
@@ -31,6 +33,12 @@ def _scrape_company(company: dict) -> list[dict]:
         raw = list(avature.scrape(company))
     elif ats == "generic":
         raw = list(generic.scrape(company))
+    elif ats == "icims_playwright":
+        from . import playwright_icims
+        raw = playwright_icims.scrape(browser, company)
+    elif ats == "avature_playwright":
+        from . import playwright_avature
+        raw = playwright_avature.scrape(browser, company)
     else:
         raise ValueError(f"Unknown ATS type: {ats!r}")
 
@@ -69,71 +77,85 @@ def run(
         if missing:
             logger.warning("Unknown company names (skipped): %s", missing)
 
+    api_key = os.environ.get("ANTHROPIC_API_KEY", "")
+    use_summaries = api_key and not api_key.startswith("sk-ant-...") and len(api_key) > 20
+    needs_playwright = any(c["ats"] in PLAYWRIGHT_ATS for c in targets)
+
+    logger.info("api_key present=%s len=%d", bool(api_key), len(api_key))
+
+    browser = None
+    playwright_ctx = None
+
+    if needs_playwright or use_summaries:
+        from playwright.sync_api import sync_playwright
+        from . import playwright_fetch, summarizer
+        playwright_ctx = sync_playwright().start()
+        browser = playwright_ctx.chromium.launch(headless=True)
+
     results = {}
 
-    for company in targets:
-        name = company["name"]
-        logger.info("Scraping %s ...", name)
+    try:
+        for company in targets:
+            name = company["name"]
+            logger.info("Scraping %s ...", name)
 
-        try:
-            jobs = _scrape_company(company)
-        except Exception as exc:
-            logger.error("[%s] Scrape failed: %s", name, exc)
-            results[name] = {"found": 0, "inserted": 0, "updated": 0, "deactivated": 0, "error": str(exc)}
-            continue
+            try:
+                jobs = _scrape_company(company, browser=browser)
+            except Exception as exc:
+                logger.error("[%s] Scrape failed: %s", name, exc)
+                results[name] = {"found": 0, "inserted": 0, "updated": 0, "deactivated": 0, "error": str(exc)}
+                continue
 
-        logger.info("[%s] %d data-role jobs found", name, len(jobs))
+            logger.info("[%s] %d data-role jobs found", name, len(jobs))
 
-        if verbose:
-            for job in jobs:
-                logger.debug("  [%s] %s | %s", name, job["title"], job.get("location", ""))
+            if verbose:
+                for job in jobs:
+                    logger.debug("  [%s] %s | %s", name, job["title"], job.get("location", ""))
 
-        try:
-            with get_conn(db_path) as conn:
-                counts = upsert_jobs_batch(conn, jobs)
-                seen_ids = {j["job_id"] for j in jobs}
-                deactivated = mark_inactive(conn, name, seen_ids)
-        except sqlite3.Error as exc:
-            logger.error("[%s] DB error: %s", name, exc)
-            results[name] = {"found": len(jobs), "inserted": 0, "updated": 0, "deactivated": 0, "error": str(exc)}
-            continue
+            try:
+                with get_conn(db_path) as conn:
+                    counts = upsert_jobs_batch(conn, jobs)
+                    seen_ids = {j["job_id"] for j in jobs}
+                    deactivated = mark_inactive(conn, name, seen_ids)
+            except sqlite3.Error as exc:
+                logger.error("[%s] DB error: %s", name, exc)
+                results[name] = {"found": len(jobs), "inserted": 0, "updated": 0, "deactivated": 0, "error": str(exc)}
+                continue
 
-        new_job_ids = counts["inserted_ids"]
-        new_jobs = [j for j in jobs if j["job_id"] in new_job_ids]
+            new_job_ids = counts["inserted_ids"]
+            new_jobs = [j for j in jobs if j["job_id"] in new_job_ids]
 
-        api_key = os.environ.get("ANTHROPIC_API_KEY", "")
-        if new_jobs and api_key and not api_key.startswith("sk-ant-...") and len(api_key) > 20:
-            from playwright.sync_api import sync_playwright
-            from . import playwright_fetch, summarizer
-            with sync_playwright() as p:
-                browser = p.chromium.launch(headless=True)
-                try:
-                    for job in new_jobs:
-                        desc = playwright_fetch.fetch_description(browser, job["url"])
-                        if desc:
-                            summ = summarizer.summarize(job["title"], job["company"], desc)
-                            with get_conn(db_path) as conn:
-                                update_description_summary(conn, job["company"], job["job_id"], desc, summ or "")
-                            if summ:
-                                logger.info("[%s] summarized: %s", job["company"], job["title"])
-                            else:
-                                logger.warning("[%s] summary failed: %s", job["company"], job["title"])
-                finally:
-                    browser.close()
+            if new_jobs and use_summaries and browser:
+                for job in new_jobs:
+                    desc = playwright_fetch.fetch_description(browser, job["url"])
+                    if desc:
+                        summ = summarizer.summarize(job["title"], job["company"], desc)
+                        with get_conn(db_path) as conn:
+                            update_description_summary(conn, job["company"], job["job_id"], desc, summ or "")
+                        if summ:
+                            logger.info("[%s] summarized: %s", job["company"], job["title"])
+                        else:
+                            logger.warning("[%s] summary failed: %s", job["company"], job["title"])
 
-        results[name] = {
-            "found": len(jobs),
-            "inserted": counts["inserted"],
-            "updated": counts["updated"],
-            "deactivated": deactivated,
-            "error": None,
-        }
-        logger.info(
-            "[%s] inserted=%d updated=%d deactivated=%d",
-            name,
-            counts["inserted"],
-            counts["updated"],
-            deactivated,
-        )
+            results[name] = {
+                "found": len(jobs),
+                "inserted": counts["inserted"],
+                "updated": counts["updated"],
+                "deactivated": deactivated,
+                "error": None,
+            }
+            logger.info(
+                "[%s] inserted=%d updated=%d deactivated=%d",
+                name,
+                counts["inserted"],
+                counts["updated"],
+                deactivated,
+            )
+
+    finally:
+        if browser:
+            browser.close()
+        if playwright_ctx:
+            playwright_ctx.stop()
 
     return results
