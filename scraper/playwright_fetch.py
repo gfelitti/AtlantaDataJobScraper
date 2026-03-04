@@ -1,20 +1,39 @@
 from playwright.sync_api import Browser
 
 SELECTORS = [
+    # Workday
     "[data-automation-id='jobPostingDescription']",
     "section[data-automation-id='jobReqDescription']",
     "[data-automation-id='job-posting-details']",
+    # iCIMS (Chick-fil-A, ICE) — content loads in a nested frame
+    ".iCIMS_JobContent",
 ]
+
+
+def _query_frames(page, selector: str) -> str | None:
+    """Try selector on main frame first, then all child frames."""
+    for frame in page.frames:
+        el = frame.query_selector(selector)
+        if el:
+            text = el.inner_text().strip()
+            if text:
+                return text
+    return None
 
 
 def fetch_description(browser: Browser, url: str) -> str | None:
     page = browser.new_page()
     try:
-        page.goto(url, wait_until="networkidle", timeout=30_000)
+        try:
+            page.goto(url, wait_until="load", timeout=30_000)
+        except Exception:
+            pass  # page may still be usable even if load didn't fully complete
+        # Give JS a moment to render dynamic content (iCIMS injects via script tags)
+        page.wait_for_timeout(5_000)
         for sel in SELECTORS:
-            el = page.query_selector(sel)
-            if el:
-                return el.inner_text().strip()
+            text = _query_frames(page, sel)
+            if text:
+                return text
         return None
     except Exception:
         return None

@@ -61,7 +61,7 @@ export default function JobsView({ initialJobs }: Props) {
     <div className="min-h-screen flex flex-col">
       <header className="px-4 py-3 bg-gray-900 text-white">
         <h1 className="text-lg font-semibold">Job Scraper</h1>
-        <p className="text-xs text-gray-400">Data-role postings — 7 Atlanta companies</p>
+        <p className="text-xs text-gray-400">Data-role postings — 17 Atlanta companies</p>
       </header>
 
       <StatsBar jobs={jobs} />
