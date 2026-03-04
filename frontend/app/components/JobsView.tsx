@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import Link from 'next/link';
 import type { Job } from '@/types/job';
 import StatsBar from './StatsBar';
 import Filters from './Filters';
@@ -59,9 +60,14 @@ export default function JobsView({ initialJobs }: Props) {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="px-4 py-3 bg-gray-900 text-white">
-        <h1 className="text-lg font-semibold">Job Scraper</h1>
-        <p className="text-xs text-gray-400">Data-role postings — 17 Atlanta companies</p>
+      <header className="px-4 py-3 bg-gray-900 text-white flex items-center justify-between">
+        <div>
+          <h1 className="text-lg font-semibold">Job Scraper</h1>
+          <p className="text-xs text-gray-400">Data-role postings — 17 Atlanta companies</p>
+        </div>
+        <Link href="/match" className="text-sm text-blue-400 hover:text-blue-300">
+          Match CV →
+        </Link>
       </header>
 
       <StatsBar jobs={jobs} />
