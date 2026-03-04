@@ -148,6 +148,9 @@ export default function JobTable({ jobs }: Props) {
                     <span className="flex items-center gap-1">
                       <span className="text-gray-400 text-xs">{expandedId === job.id ? '▼' : '▶'}</span>
                       {job.title}
+                      {job.summary && (
+                        <span title="AI summary available" className="text-base leading-none">🤖</span>
+                      )}
                     </span>
                   </td>
                   <td className="px-4 py-2 text-gray-500 whitespace-nowrap">{job.location ?? '—'}</td>
