@@ -143,12 +143,14 @@ export default function JobTable({ jobs }: Props) {
               </td>
             </tr>
           ) : (
-            sorted.map((job) => (
+            sorted.map((job) => {
+              const isNew = job.posted_date === new Date().toISOString().slice(0, 10);
+              return (
               <>
                 <tr
                   key={job.id}
                   onClick={() => setExpandedId(expandedId === job.id ? null : job.id)}
-                  className="hover:bg-blue-50 cursor-pointer"
+                  className={`cursor-pointer ${isNew ? 'bg-green-50 hover:bg-green-100' : 'hover:bg-blue-50'}`}
                 >
                   <td className="px-4 py-2 font-medium whitespace-nowrap">{job.company}</td>
                   <td className="px-4 py-2">
@@ -171,7 +173,8 @@ export default function JobTable({ jobs }: Props) {
                   </tr>
                 )}
               </>
-            ))
+              );
+            })
           )}
         </tbody>
       </table>
