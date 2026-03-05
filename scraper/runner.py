@@ -16,7 +16,7 @@ load_dotenv(Path(__file__).parent.parent / ".env")
 from . import avature, generic, workday
 from .config import COMPANIES
 from .db import get_conn, mark_inactive, update_description_summary, upsert_jobs_batch
-from .filters import is_atlanta, is_data_role
+from .filters import has_sponsorship_restriction, is_atlanta, is_data_role
 
 logger = logging.getLogger(__name__)
 
@@ -129,6 +129,14 @@ def run(
                 for job in new_jobs:
                     desc = playwright_fetch.fetch_description(browser, job["url"])
                     if desc:
+                        if has_sponsorship_restriction(desc):
+                            logger.info("[%s] dropped (no sponsorship): %s", job["company"], job["title"])
+                            with get_conn(db_path) as conn:
+                                conn.execute(
+                                    "UPDATE jobs SET is_active=0 WHERE company=? AND job_id=?",
+                                    (job["company"], job["job_id"]),
+                                )
+                            continue
                         summ = summarizer.summarize(job["title"], job["company"], desc)
                         with get_conn(db_path) as conn:
                             update_description_summary(conn, job["company"], job["job_id"], desc, summ or "")

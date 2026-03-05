@@ -44,6 +44,27 @@ _ATLANTA_TERMS = [
 ]
 
 
+_SPONSORSHIP_PATTERNS = re.compile(
+    r"no\s+(opt|cpt|stem[\s/]*opt|visa\s+sponsor)",
+    re.IGNORECASE,
+)
+
+_AUTHORIZATION_PATTERNS = re.compile(
+    r"(must|required)\s+.{0,60}(authorized|eligible)\s+to\s+work\s+in\s+the\s+u\.?s\.?"
+    r"|without\s+(current\s+or\s+future\s+)?sponsorship"
+    r"|sponsorship\s+(is\s+)?(not|unavailable|not\s+available)",
+    re.IGNORECASE,
+)
+
+
+def has_sponsorship_restriction(description: str) -> bool:
+    """Return True if the job description explicitly excludes visa sponsorship / OPT/CPT."""
+    return bool(
+        _SPONSORSHIP_PATTERNS.search(description)
+        or _AUTHORIZATION_PATTERNS.search(description)
+    )
+
+
 def is_atlanta(location: str | None) -> bool:
     """
     Return True if the location is in the Atlanta metro area.
