@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import type { Job } from '@/types/job';
 
-type SortKey = 'company' | 'title';
+type SortKey = 'company' | 'title' | 'posted_date';
 
 interface Props {
   jobs: Job[];
@@ -84,8 +84,8 @@ function DetailPanel({ job }: { job: Job }) {
 }
 
 export default function JobTable({ jobs }: Props) {
-  const [sortKey, setSortKey] = useState<SortKey>('company');
-  const [sortAsc, setSortAsc] = useState(true);
+  const [sortKey, setSortKey] = useState<SortKey>('posted_date');
+  const [sortAsc, setSortAsc] = useState(false);
   const [expandedId, setExpandedId] = useState<number | null>(null);
 
   function handleSort(key: SortKey) {
@@ -98,7 +98,9 @@ export default function JobTable({ jobs }: Props) {
   }
 
   const sorted = [...jobs].sort((a, b) => {
-    const cmp = a[sortKey].localeCompare(b[sortKey]);
+    const av = a[sortKey] ?? '';
+    const bv = b[sortKey] ?? '';
+    const cmp = av.localeCompare(bv);
     return sortAsc ? cmp : -cmp;
   });
 
@@ -125,7 +127,12 @@ export default function JobTable({ jobs }: Props) {
               Title <SortIndicator col="title" />
             </th>
             <th className="px-4 py-2 text-left font-medium text-gray-600">Location</th>
-            <th className="px-4 py-2 text-left font-medium text-gray-600 whitespace-nowrap">Posted</th>
+            <th
+              className="px-4 py-2 text-left font-medium text-gray-600 whitespace-nowrap cursor-pointer select-none"
+              onClick={() => handleSort('posted_date')}
+            >
+              Posted <SortIndicator col="posted_date" />
+            </th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-100">
