@@ -8,6 +8,8 @@ from typing import Iterator
 
 import requests
 
+from .filters import parse_posted_date
+
 logger = logging.getLogger(__name__)
 
 _SESSION = requests.Session()
@@ -102,7 +104,7 @@ def scrape(company: dict, search_text: str = "data") -> Iterator[dict]:
                 "title": title,
                 "location": location_nodes,
                 "url": _job_url(tenant, suffix, site, external_path),
-                "posted_date": posting.get("postedOn", None),
+                "posted_date": parse_posted_date(posting.get("postedOn")),
             }
 
         offset += len(job_postings)

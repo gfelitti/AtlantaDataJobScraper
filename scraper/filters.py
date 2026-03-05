@@ -44,6 +44,26 @@ _ATLANTA_TERMS = [
 ]
 
 
+def parse_posted_date(raw: str | None) -> str | None:
+    """
+    Convert Workday relative dates to ISO format (YYYY-MM-DD).
+    Examples: "Posted 5 Days Ago" -> "2026-02-27", "Posted 30+ Days Ago" -> "2026-02-02"
+    Returns None if unparseable.
+    """
+    if not raw:
+        return None
+    from datetime import date, timedelta
+    lower = raw.lower()
+    if "today" in lower or "just posted" in lower:
+        return date.today().isoformat()
+    if "yesterday" in lower:
+        return (date.today() - timedelta(days=1)).isoformat()
+    m = re.search(r"(\d+)\+?\s+days?\s+ago", lower)
+    if m:
+        return (date.today() - timedelta(days=int(m.group(1)))).isoformat()
+    return None
+
+
 _SPONSORSHIP_PATTERNS = re.compile(
     r"no\s+(opt|cpt|stem[\s/]*opt|visa\s+sponsor)",
     re.IGNORECASE,
