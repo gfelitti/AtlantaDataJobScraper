@@ -107,6 +107,20 @@ COMPANIES: list[dict] = [
         "wday_suffix": "wd1",
         "site": "ext_atleos_us",
     },
+    {
+        "name": "Salesforce",
+        "ats": "workday",
+        "tenant": "salesforce",
+        "wday_suffix": "wd12",
+        "site": "External_Career_Site",
+    },
+    {
+        "name": "RaceTrac",
+        "ats": "workday",
+        "tenant": "racetrac",
+        "wday_suffix": "wd5",
+        "site": "SSC",
+    },
     # ── Avature (Playwright) ─────────────────────────────────────────────
     {
         "name": "Delta",
