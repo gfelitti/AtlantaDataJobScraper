@@ -144,7 +144,11 @@ export default function JobTable({ jobs }: Props) {
             </tr>
           ) : (
             sorted.map((job) => {
-              const isNew = job.posted_date === new Date().toISOString().slice(0, 10);
+              const today = new Date();
+              const yesterday = new Date(today);
+              yesterday.setDate(today.getDate() - 1);
+              const isNew = job.posted_date === today.toISOString().slice(0, 10) ||
+                            job.posted_date === yesterday.toISOString().slice(0, 10);
               return (
               <>
                 <tr
