@@ -4,6 +4,7 @@ No authentication or cookies required.
 """
 
 import logging
+import re
 from typing import Iterator
 
 import requests
@@ -97,6 +98,13 @@ def scrape(company: dict, search_text: str = "data") -> Iterator[dict]:
             job_id = external_path.rsplit("_", 1)[-1] if "_" in external_path else external_path
             title = posting.get("title", "")
             location_nodes = posting.get("locationsText", "")
+
+            # For "X Locations" entries, extract location from externalPath as a proxy.
+            # externalPath format: /job/Georgia---Atlanta/Title_REQ → "Georgia - Atlanta"
+            if re.search(r"\d+\s+locations?", (location_nodes or "").lower()):
+                parts = external_path.strip("/").split("/")
+                if len(parts) >= 2 and parts[0] == "job":
+                    location_nodes = parts[1].replace("---", " - ").replace("-", " ")
 
             yield {
                 "company": company_name,
