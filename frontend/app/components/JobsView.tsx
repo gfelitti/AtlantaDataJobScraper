@@ -65,9 +65,10 @@ export default function JobsView({ initialJobs }: Props) {
           <h1 className="text-lg font-semibold">Job Scraper</h1>
           <p className="text-xs text-gray-400">Data-role postings — 25 Atlanta companies</p>
         </div>
-        <Link href="/match" className="text-sm text-blue-400 hover:text-blue-300">
-          Match CV →
-        </Link>
+        <div className="flex gap-4">
+          <Link href="/stats" className="text-sm text-blue-400 hover:text-blue-300">Stats</Link>
+          <Link href="/match" className="text-sm text-blue-400 hover:text-blue-300">Match CV →</Link>
+        </div>
       </header>
 
       <StatsBar jobs={jobs} />
