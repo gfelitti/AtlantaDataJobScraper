@@ -107,18 +107,8 @@ echo "==> Transferring image to instance (this may take a few minutes)..."
 docker save "$IMAGE_NAME" | gzip | ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no "ec2-user@$INSTANCE_IP" \
   "gunzip | docker load"
 
-# ── 6. Copy local database to instance ───────────────────────────────────────
-DB_LOCAL="${DB_PATH:-jobs.db}"
-if [[ -f "$DB_LOCAL" ]]; then
-  echo "==> Copying $DB_LOCAL to instance at $DATA_DIR/jobs.db..."
-  $SSH "sudo mkdir -p $DATA_DIR && sudo chmod 777 $DATA_DIR"
-  scp -i "$SSH_KEY" -o StrictHostKeyChecking=no "$DB_LOCAL" "ec2-user@$INSTANCE_IP:/tmp/jobs.db"
-  $SSH "sudo mv /tmp/jobs.db $DATA_DIR/jobs.db"
-  echo "==> Database copied."
-else
-  echo "==> WARNING: $DB_LOCAL not found locally — starting with empty database."
-  $SSH "sudo mkdir -p $DATA_DIR"
-fi
+# ── 6. Ensure data directory exists (preserve existing db on instance) ────────
+$SSH "sudo mkdir -p $DATA_DIR && sudo mkdir -p $DATA_DIR/uploads && sudo chmod 777 $DATA_DIR $DATA_DIR/uploads"
 
 # ── 7. Run container ──────────────────────────────────────────────────────────
 echo "==> Starting container..."
@@ -132,6 +122,9 @@ $SSH "
     -v $DATA_DIR:/data \
     -v $DATA_DIR/uploads:/tmp \
     -e ANTHROPIC_API_KEY='$API_KEY' \
+    -e RESEND_API_KEY='${RESEND_API_KEY:-}' \
+    -e EMAIL_FROM='${EMAIL_FROM:-}' \
+    -e EMAIL_TO='${EMAIL_TO:-}' \
     -e DB_PATH=$DATA_DIR/jobs.db \
     -e PORT=$PORT \
     $IMAGE_NAME
