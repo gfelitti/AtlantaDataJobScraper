@@ -93,7 +93,7 @@ export default function StatsPage() {
           ) : (
             <div className="flex items-end gap-1 h-32">
               {byDate.map(({ date, n }) => (
-                <div key={date} className="flex-1 flex flex-col items-center gap-1 group relative">
+                <div key={date} className="flex-1 h-full flex flex-col justify-end group relative">
                   <div
                     className="w-full bg-blue-500 rounded-t"
                     style={{ height: `${(n / maxDateCount) * 100}%` }}
