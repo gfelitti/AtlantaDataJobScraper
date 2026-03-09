@@ -121,11 +121,44 @@ COMPANIES: list[dict] = [
         "wday_suffix": "wd5",
         "site": "SSC",
     },
+    {
+        "name": "Coca-Cola",
+        "ats": "workday",
+        "tenant": "coke",
+        "wday_suffix": "wd1",
+        "site": "coca-cola-careers",
+    },
+    {
+        "name": "Inspire Brands",
+        "ats": "workday",
+        "tenant": "inspirebrands",
+        "wday_suffix": "wd5",
+        "site": "InspireCareers",
+    },
+    {
+        "name": "Invesco",
+        "ats": "workday",
+        "tenant": "invesco",
+        "wday_suffix": "wd1",
+        "site": "IVZ",
+    },
+    {
+        "name": "Veritiv",
+        "ats": "workday",
+        "tenant": "veritiv",
+        "wday_suffix": "wd5",
+        "site": "VeritivCareers",
+    },
     # ── Avature (Playwright) ─────────────────────────────────────────────
     {
         "name": "Delta",
         "ats": "avature_playwright",
         "base_url": "https://delta.avature.net/en_US/careers/SearchJobs",
+    },
+    {
+        "name": "Smurfit WestRock",
+        "ats": "avature_playwright",
+        "base_url": "https://smurfitwestrockta.avature.net/en_US/careers/SearchJobs",
     },
     # ── iCIMS (Playwright) ───────────────────────────────────────────────
     {
@@ -137,5 +170,10 @@ COMPANIES: list[dict] = [
         "name": "ICE",
         "ats": "icims_playwright",
         "base_url": "https://careers-ice.icims.com/jobs/search",
+    },
+    {
+        "name": "Novelis",
+        "ats": "icims_playwright",
+        "base_url": "https://jobs-novelis.icims.com/jobs/search",
     },
 ]

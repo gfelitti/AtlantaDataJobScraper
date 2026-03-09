@@ -151,6 +151,7 @@ def run(
                 "updated": counts["updated"],
                 "deactivated": deactivated,
                 "error": None,
+                "new_jobs": new_jobs,
             }
             logger.info(
                 "[%s] inserted=%d updated=%d deactivated=%d",

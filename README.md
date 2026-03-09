@@ -2,9 +2,9 @@
 
 Scrapes data and analytics job postings from major Atlanta-area employers, stores them in a SQLite database, and serves them through a Next.js web interface. Generates AI-powered structured summaries for each posting using Claude Haiku. Includes a CV matching feature that ranks active jobs against your resume using Claude Opus.
 
-## Companies tracked (17)
+## Companies tracked (25)
 
-Cardlytics, Carter's, Chick-fil-A, Cox Enterprises, Delta, Equifax, Fiserv, Genuine Parts, Global Payments, Home Depot, ICE, Manhattan Associates, NCR Atleos, NCR Voyix, Truist, UPS, Warner Bros. Discovery.
+Cardlytics, Carter's, Chick-fil-A, Coca-Cola, Cox Enterprises, Delta, Equifax, Fiserv, Genuine Parts, Global Payments, Home Depot, ICE, Inspire Brands, Invesco, Manhattan Associates, NCR Atleos, NCR Voyix, Novelis, RaceTrac, Salesforce, Smurfit WestRock, Truist, UPS, Veritiv, Warner Bros. Discovery.
 
 ## Stack
 

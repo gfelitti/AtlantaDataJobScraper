@@ -16,6 +16,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from scraper.config import COMPANIES
 from scraper.db import init_db
+from scraper.emailer import send_digest
 from scraper.runner import run
 
 
@@ -59,6 +60,8 @@ def main() -> None:
     total_found = total_inserted = total_updated = total_deactivated = 0
     errors = []
 
+    new_jobs_by_company: dict[str, list] = {}
+
     for company, stats in results.items():
         found = stats["found"]
         inserted = stats["inserted"]
@@ -76,6 +79,8 @@ def main() -> None:
 
         if error:
             errors.append(company)
+        elif stats.get("new_jobs"):
+            new_jobs_by_company[company] = stats["new_jobs"]
 
     print("─────────────────────────────────────────────────────")
     print(
@@ -84,6 +89,9 @@ def main() -> None:
     )
     if errors:
         print(f"\n  Failed companies: {', '.join(errors)}")
+
+    if new_jobs_by_company:
+        send_digest(new_jobs_by_company)
 
     sys.exit(1 if errors else 0)
 
