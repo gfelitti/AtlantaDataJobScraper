@@ -149,6 +149,34 @@ COMPANIES: list[dict] = [
         "wday_suffix": "wd5",
         "site": "VeritivCareers",
     },
+    {
+        "name": "Assurant",
+        "ats": "workday",
+        "tenant": "assurant",
+        "wday_suffix": "wd1",
+        "site": "Assurant_Careers",
+    },
+    {
+        "name": "Corpay",
+        "ats": "workday",
+        "tenant": "corpay",
+        "wday_suffix": "wd103",
+        "site": "Ext_001",
+    },
+    {
+        "name": "Floor & Decor",
+        "ats": "workday",
+        "tenant": "flooranddecoroutlets",
+        "wday_suffix": "wd1",
+        "site": "FloorandDecorCareers",
+    },
+    {
+        "name": "PulteGroup",
+        "ats": "workday",
+        "tenant": "pultegroup",
+        "wday_suffix": "wd1",
+        "site": "PGI",
+    },
     # ── Avature (Playwright) ─────────────────────────────────────────────
     {
         "name": "Delta",
