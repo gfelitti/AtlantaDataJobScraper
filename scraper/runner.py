@@ -42,7 +42,8 @@ def _scrape_company(company: dict, browser=None) -> list[dict]:
     else:
         raise ValueError(f"Unknown ATS type: {ats!r}")
 
-    return [job for job in raw if is_data_role(job["title"]) and is_atlanta(job["location"])]
+    assume_atlanta = company.get("assume_atlanta", False)
+    return [job for job in raw if is_data_role(job["title"]) and (assume_atlanta or is_atlanta(job["location"]))]
 
 
 def run(

@@ -191,6 +191,13 @@ COMPANIES: list[dict] = [
         "wday_suffix": "wd3",
         "site": "CircleKStoreJobs",
     },
+    {
+        "name": "Children's Healthcare of Atlanta",
+        "ats": "workday",
+        "tenant": "choa",
+        "wday_suffix": "wd12",
+        "site": "externalcareers",
+    },
     # ── Avature (Playwright) ─────────────────────────────────────────────
     {
         "name": "Delta",
@@ -222,5 +229,11 @@ COMPANIES: list[dict] = [
         "name": "Emory Healthcare",
         "ats": "icims_playwright",
         "base_url": "https://ehccareers-emory.icims.com/jobs/search",
+    },
+    {
+        "name": "Emory University",
+        "ats": "icims_playwright",
+        "base_url": "https://staff-emory.icims.com/jobs/search",
+        "assume_atlanta": True,
     },
 ]
