@@ -23,6 +23,8 @@ export function getJobById(id: number): Job | null {
 }
 
 export function getCompaniesCount(): number {
+  const row = getDb().prepare("SELECT value FROM settings WHERE key = 'companies_monitored'").get() as { value: string } | undefined;
+  if (row) return parseInt(row.value, 10);
   return (getDb().prepare('SELECT COUNT(DISTINCT company) as count FROM jobs').get() as { count: number }).count;
 }
 

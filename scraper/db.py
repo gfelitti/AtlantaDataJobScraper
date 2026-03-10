@@ -4,6 +4,10 @@ from datetime import datetime, timezone
 
 
 SCHEMA = """
+CREATE TABLE IF NOT EXISTS settings (
+    key   TEXT PRIMARY KEY,
+    value TEXT NOT NULL
+);
 CREATE TABLE IF NOT EXISTS jobs (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
     company     TEXT    NOT NULL,
@@ -41,6 +45,13 @@ def init_db(db_path: str) -> None:
                 conn.execute(f"ALTER TABLE jobs ADD COLUMN {col} TEXT")
             except sqlite3.OperationalError:
                 pass  # already exists
+
+
+def set_setting(conn: sqlite3.Connection, key: str, value: str) -> None:
+    conn.execute(
+        "INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value",
+        (key, value),
+    )
 
 
 def upsert_jobs(conn: sqlite3.Connection, jobs: list[dict]) -> tuple[int, int]:

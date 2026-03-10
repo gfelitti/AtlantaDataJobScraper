@@ -15,7 +15,7 @@ load_dotenv(Path(__file__).parent.parent / ".env")
 
 from . import avature, generic, workday
 from .config import COMPANIES
-from .db import get_conn, mark_inactive, update_description_summary, upsert_jobs_batch
+from .db import get_conn, mark_inactive, set_setting, update_description_summary, upsert_jobs_batch
 from .filters import has_sponsorship_restriction, is_atlanta, is_data_role
 
 logger = logging.getLogger(__name__)
@@ -77,6 +77,9 @@ def run(
         missing = set(company_names) - {c["name"] for c in targets}
         if missing:
             logger.warning("Unknown company names (skipped): %s", missing)
+
+    with get_conn(db_path) as conn:
+        set_setting(conn, "companies_monitored", str(len(COMPANIES)))
 
     api_key = os.environ.get("ANTHROPIC_API_KEY", "")
     use_summaries = api_key and not api_key.startswith("sk-ant-...") and len(api_key) > 20
