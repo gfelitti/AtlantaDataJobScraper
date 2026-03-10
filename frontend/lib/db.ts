@@ -22,6 +22,10 @@ export function getJobById(id: number): Job | null {
   return (getDb().prepare('SELECT id, company, title, location, posted_date, url, is_active, summary FROM jobs WHERE id = ?').get(id) as Job) ?? null;
 }
 
+export function getCompaniesCount(): number {
+  return (getDb().prepare('SELECT COUNT(DISTINCT company) as count FROM jobs').get() as { count: number }).count;
+}
+
 export function getJobs({ company, search, active }: GetJobsParams = {}): Job[] {
   const conditions: string[] = [];
   const params: (string | number)[] = [];
