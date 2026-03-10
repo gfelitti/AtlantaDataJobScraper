@@ -177,6 +177,20 @@ COMPANIES: list[dict] = [
         "wday_suffix": "wd1",
         "site": "PGI",
     },
+    {
+        "name": "Stanley Black & Decker",
+        "ats": "workday",
+        "tenant": "sbdinc",
+        "wday_suffix": "wd1",
+        "site": "Stanley_Black_Decker_Career_Site",
+    },
+    {
+        "name": "Circle K",
+        "ats": "workday",
+        "tenant": "circlek",
+        "wday_suffix": "wd3",
+        "site": "CircleKStoreJobs",
+    },
     # ── Avature (Playwright) ─────────────────────────────────────────────
     {
         "name": "Delta",
@@ -203,5 +217,10 @@ COMPANIES: list[dict] = [
         "name": "Novelis",
         "ats": "icims_playwright",
         "base_url": "https://jobs-novelis.icims.com/jobs/search",
+    },
+    {
+        "name": "Emory Healthcare",
+        "ats": "icims_playwright",
+        "base_url": "https://ehccareers-emory.icims.com/jobs/search",
     },
 ]

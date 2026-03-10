@@ -80,9 +80,13 @@ def scrape(browser: Browser, company: dict, search_text: str = "data") -> list[d
             )
             try:
                 page.goto(outer_url, wait_until="networkidle", timeout=TIMEOUT)
-            except Exception as e:
-                logger.error("[%s] Navigation error at page=%d: %s", company_name, page_num, e)
-                break
+            except Exception:
+                try:
+                    page.goto(outer_url, wait_until="load", timeout=TIMEOUT)
+                    page.wait_for_timeout(3000)
+                except Exception as e:
+                    logger.error("[%s] Navigation error at page=%d: %s", company_name, page_num, e)
+                    break
 
             # Jobs are in the first non-main iframe (frame index 1)
             frames = page.frames
