@@ -115,6 +115,13 @@ COMPANIES: list[dict] = [
         "site": "External_Career_Site",
     },
     {
+        "name": "Cisco",
+        "ats": "workday",
+        "tenant": "cisco",
+        "wday_suffix": "wd5",
+        "site": "Cisco_Careers",
+    },
+    {
         "name": "RaceTrac",
         "ats": "workday",
         "tenant": "racetrac",
