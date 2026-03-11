@@ -205,6 +205,16 @@ COMPANIES: list[dict] = [
         "wday_suffix": "wd12",
         "site": "externalcareers",
     },
+    # ── EY ───────────────────────────────────────────────────────────────
+    {
+        "name": "EY",
+        "ats": "ey_playwright",
+    },
+    # ── Intuit ───────────────────────────────────────────────────────────
+    {
+        "name": "Intuit",
+        "ats": "intuit_playwright",
+    },
     # ── Avature (Playwright) ─────────────────────────────────────────────
     {
         "name": "Delta",

@@ -20,7 +20,7 @@ from .filters import has_sponsorship_restriction, is_atlanta, is_data_role
 
 logger = logging.getLogger(__name__)
 
-PLAYWRIGHT_ATS = {"icims_playwright", "avature_playwright", "successfactors_playwright"}
+PLAYWRIGHT_ATS = {"icims_playwright", "avature_playwright", "successfactors_playwright", "ey_playwright", "intuit_playwright"}
 
 
 def _scrape_company(company: dict, browser=None) -> list[dict]:
@@ -42,6 +42,12 @@ def _scrape_company(company: dict, browser=None) -> list[dict]:
     elif ats == "successfactors_playwright":
         from . import playwright_successfactors
         raw = playwright_successfactors.scrape(browser, company)
+    elif ats == "ey_playwright":
+        from . import playwright_ey
+        raw = playwright_ey.scrape(browser, company)
+    elif ats == "intuit_playwright":
+        from . import playwright_intuit
+        raw = playwright_intuit.scrape(browser, company)
     else:
         raise ValueError(f"Unknown ATS type: {ats!r}")
 
