@@ -205,6 +205,14 @@ COMPANIES: list[dict] = [
         "wday_suffix": "wd12",
         "site": "externalcareers",
     },
+    # ── Amazon ───────────────────────────────────────────────────────────
+    {
+        "name": "Amazon Web Services",
+        "ats": "aws",
+        "city": "Atlanta",
+        "business_category": "amazon-web-services",
+        "assume_atlanta": True,
+    },
     # ── EY ───────────────────────────────────────────────────────────────
     {
         "name": "EY",

@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 
 load_dotenv(Path(__file__).parent.parent / ".env")
 
-from . import avature, generic, workday
+from . import aws, avature, generic, workday
 from .config import COMPANIES
 from .db import get_conn, mark_inactive, set_setting, update_description_summary, upsert_jobs_batch
 from .filters import has_sponsorship_restriction, is_atlanta, is_data_role
@@ -27,7 +27,9 @@ def _scrape_company(company: dict, browser=None) -> list[dict]:
     """Route to the right scraper and return all matching jobs."""
     ats = company["ats"]
 
-    if ats == "workday":
+    if ats == "aws":
+        raw = list(aws.scrape(company))
+    elif ats == "workday":
         raw = list(workday.scrape(company))
     elif ats == "avature":
         raw = list(avature.scrape(company))
