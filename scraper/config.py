@@ -205,6 +205,13 @@ COMPANIES: list[dict] = [
         "wday_suffix": "wd12",
         "site": "externalcareers",
     },
+    # ── Google ───────────────────────────────────────────────────────────
+    {
+        "name": "Google",
+        "ats": "google",
+        "location": "Atlanta, GA, USA",
+        "assume_atlanta": True,
+    },
     # ── Microsoft ────────────────────────────────────────────────────────
     {
         "name": "Microsoft",
