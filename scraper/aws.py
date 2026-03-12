@@ -3,6 +3,7 @@ Amazon Jobs scraper using the public search.json API.
 No authentication or Playwright required.
 """
 
+import json
 import logging
 from datetime import datetime
 from typing import Iterator
@@ -23,6 +24,30 @@ _SESSION.headers.update({
 
 PAGE_SIZE = 100
 TIMEOUT = 30
+
+
+def _resolve_location(j: dict) -> str:
+    """
+    Return the GA location string for a job.
+    The primary `location` field reflects the first/largest posting location,
+    which may not be GA even though Atlanta is one of the job's locations.
+    When the primary location is not in GA, scan the `locations` array for a GA entry.
+    """
+    if j.get("state") == "GA":
+        return j.get("location", "")
+    for loc_str in j.get("locations") or []:
+        try:
+            loc = json.loads(loc_str)
+            if loc.get("region") == "GA":
+                return loc.get("location", j.get("location", ""))
+        except (json.JSONDecodeError, AttributeError):
+            continue
+    return j.get("location", "")
+
+
+def _is_data_center_role(title: str) -> bool:
+    """Return True for physical data center operations roles (not data/analytics)."""
+    return "data center" in title.lower()
 
 
 def _parse_date(raw: str | None) -> str | None:
@@ -82,12 +107,15 @@ def scrape(company: dict) -> Iterator[dict]:
             break
 
         for j in jobs:
+            title = j.get("title", "")
+            if _is_data_center_role(title):
+                continue
             job_path = j.get("job_path", "")
             yield {
                 "company": company_name,
                 "job_id": str(j.get("id_icims") or j.get("id", "")),
-                "title": j.get("title", ""),
-                "location": j.get("location", ""),
+                "title": title,
+                "location": _resolve_location(j),
                 "url": _JOB_BASE + job_path if job_path else "",
                 "posted_date": _parse_date(j.get("posted_date")),
             }
