@@ -24,8 +24,8 @@ _SESSION.headers.update({
 })
 
 TIMEOUT = 30
-_MAX_RETRIES = 3
-_RETRY_DELAY = 3  # seconds between retries on 403
+_MAX_RETRIES = 5
+_RETRY_STATUSES = {403, 429}
 
 
 def _fetch_page(location: str, start: int) -> dict:
@@ -39,11 +39,14 @@ def _fetch_page(location: str, start: int) -> dict:
         "filter_include_remote": 1,
         "hl": "en",
     }
+    delay = 5
     for attempt in range(_MAX_RETRIES):
         resp = _SESSION.get(_BASE_URL, params=params, timeout=TIMEOUT)
-        if resp.status_code == 403 and attempt < _MAX_RETRIES - 1:
-            logger.warning("Microsoft 403 at start=%d, retry %d/%d", start, attempt + 1, _MAX_RETRIES)
-            time.sleep(_RETRY_DELAY)
+        if resp.status_code in _RETRY_STATUSES and attempt < _MAX_RETRIES - 1:
+            logger.warning("Microsoft %d at start=%d, retry %d/%d (wait %ds)",
+                           resp.status_code, start, attempt + 1, _MAX_RETRIES, delay)
+            time.sleep(delay)
+            delay *= 2  # exponential backoff: 5, 10, 20, 40s
             continue
         resp.raise_for_status()
         return resp.json()["data"]
