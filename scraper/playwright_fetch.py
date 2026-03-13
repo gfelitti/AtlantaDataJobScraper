@@ -10,6 +10,8 @@ SELECTORS = [
     "[data-automation-id='job-posting-details']",
     # iCIMS (Chick-fil-A, ICE) — content loads in a nested frame
     ".iCIMS_JobContent",
+    # EY
+    ".jobdescription",
 ]
 
 
