@@ -40,7 +40,7 @@ def get_conn(db_path: str):
 def init_db(db_path: str) -> None:
     with get_conn(db_path) as conn:
         conn.executescript(SCHEMA)
-        for col in ("description", "summary"):
+        for col in ("description", "summary", "deactivated_at"):
             try:
                 conn.execute(f"ALTER TABLE jobs ADD COLUMN {col} TEXT")
             except sqlite3.OperationalError:
@@ -118,12 +118,13 @@ def upsert_jobs_batch(conn: sqlite3.Connection, jobs: list[dict]) -> dict:
     conn.executemany(
         """
         UPDATE jobs SET
-            title       = :title,
-            location    = :location,
-            url         = :url,
-            posted_date = :posted_date,
-            scraped_at  = :scraped_at,
-            is_active   = 1
+            title          = :title,
+            location       = :location,
+            url            = :url,
+            posted_date    = :posted_date,
+            scraped_at     = :scraped_at,
+            is_active      = 1,
+            deactivated_at = NULL
         WHERE company = :company AND job_id = :job_id
         """,
         [{**j, "scraped_at": now} for j in to_update],
@@ -152,14 +153,15 @@ def mark_inactive(conn: sqlite3.Connection, company: str, seen_job_ids: set[str]
         return 0
 
     placeholders = ",".join("?" * len(seen_job_ids))
+    now = datetime.now(timezone.utc).isoformat()
     cursor = conn.execute(
         f"""
         UPDATE jobs
-        SET is_active = 0
+        SET is_active = 0, deactivated_at = ?
         WHERE company = ?
           AND job_id NOT IN ({placeholders})
           AND is_active = 1
         """,
-        [company, *seen_job_ids],
+        [now, company, *seen_job_ids],
     )
     return cursor.rowcount
