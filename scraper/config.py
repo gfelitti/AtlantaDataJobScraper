@@ -227,6 +227,14 @@ COMPANIES: list[dict] = [
         "business_category": "amazon-web-services",
         "assume_atlanta": True,
     },
+    # ── State Farm ───────────────────────────────────────────────────────
+    {
+        "name": "State Farm",
+        "ats": "statefarm",
+        "state": "Georgia",
+        "brand": "State Farm",
+        "assume_atlanta": True,
+    },
     # ── EY ───────────────────────────────────────────────────────────────
     {
         "name": "EY",

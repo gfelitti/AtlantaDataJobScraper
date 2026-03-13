@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 
 load_dotenv(Path(__file__).parent.parent / ".env")
 
-from . import aws, avature, generic, google, microsoft, workday
+from . import aws, avature, generic, google, microsoft, statefarm, workday
 from .config import COMPANIES
 from .db import get_conn, mark_inactive, set_setting, update_description_summary, upsert_jobs_batch
 from .filters import has_sponsorship_restriction, is_atlanta, is_data_role
@@ -37,6 +37,8 @@ def _scrape_company(company: dict, browser=None) -> list[dict]:
         raw = list(workday.scrape(company))
     elif ats == "avature":
         raw = list(avature.scrape(company))
+    elif ats == "statefarm":
+        raw = list(statefarm.scrape(company))
     elif ats == "generic":
         raw = list(generic.scrape(company))
     elif ats == "icims_playwright":
