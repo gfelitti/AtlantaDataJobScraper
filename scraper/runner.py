@@ -185,7 +185,7 @@ def run(
                 "updated": counts["updated"],
                 "deactivated": deactivated,
                 "error": None,
-                "new_jobs": new_jobs,
+                "new_jobs": [j for j in jobs if j["job_id"] in new_job_ids],
             }
             logger.info(
                 "[%s] inserted=%d updated=%d deactivated=%d",
