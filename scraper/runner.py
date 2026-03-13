@@ -142,10 +142,25 @@ def run(
                 continue
 
             new_job_ids = counts["inserted_ids"]
-            new_jobs = [j for j in jobs if j["job_id"] in new_job_ids]
 
-            if new_jobs and use_summaries and browser:
-                for job in new_jobs:
+            # Also include existing jobs that have no description yet (e.g. from runs before
+            # description extraction was implemented for this ATS type)
+            if use_summaries:
+                with get_conn(db_path) as conn:
+                    no_desc_ids = {
+                        row["job_id"]
+                        for row in conn.execute(
+                            "SELECT job_id FROM jobs WHERE company=? AND is_active=1 AND (description IS NULL OR description='')",
+                            (name,),
+                        ).fetchall()
+                    }
+            else:
+                no_desc_ids = set()
+
+            jobs_needing_desc = [j for j in jobs if j["job_id"] in new_job_ids | no_desc_ids]
+
+            if jobs_needing_desc and use_summaries and browser:
+                for job in jobs_needing_desc:
                     desc = job.get("description") or playwright_fetch.fetch_description(browser, job["url"])
                     if desc:
                         if has_sponsorship_restriction(desc):
