@@ -25,6 +25,23 @@ _SESSION.headers.update({
 
 TIMEOUT = 30
 _MAX_RETRIES = 5
+_GA_TERMS = ("georgia", ", ga,", "atlanta")
+
+
+def _ga_location(locations: list[str]) -> str:
+    """Return the first GA location string, falling back to first entry."""
+    for loc in locations:
+        if any(t in loc.lower() for t in _GA_TERMS):
+            return loc
+    return locations[0] if locations else ""
+
+
+def _is_data_center_role(title: str) -> bool:
+    """Exclude physical data center operations roles."""
+    lower = title.lower()
+    return "datacenter" in lower or "data center" in lower
+
+
 _RETRY_STATUSES = {403, 429}
 
 
@@ -84,19 +101,21 @@ def scrape(company: dict) -> Iterator[dict]:
             break
 
         for p in positions:
+            title = p.get("name", "")
+            if _is_data_center_role(title):
+                continue
+
             posted_ts = p.get("postedTs")
             posted_date = (
                 datetime.fromtimestamp(posted_ts, tz=timezone.utc).date().isoformat()
                 if posted_ts else None
             )
-            # locations is a list — join for storage; is_atlanta check bypassed via assume_atlanta
-            location_str = ", ".join(p.get("locations") or [])
 
             yield {
                 "company": company_name,
                 "job_id": str(p.get("atsJobId") or p.get("id", "")),
-                "title": p.get("name", ""),
-                "location": location_str,
+                "title": title,
+                "location": _ga_location(p.get("locations") or []),
                 "url": _JOB_BASE + p["positionUrl"],
                 "posted_date": posted_date,
             }

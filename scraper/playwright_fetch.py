@@ -1,3 +1,6 @@
+import json
+import re
+
 from playwright.sync_api import Browser
 
 SELECTORS = [
@@ -34,6 +37,16 @@ def fetch_description(browser: Browser, url: str) -> str | None:
             text = _query_frames(page, sel)
             if text:
                 return text
+        # Fallback: JSON-LD JobPosting (Microsoft, etc.)
+        try:
+            html = page.content()
+            m = re.search(r'<script type="application/ld\+json">(.*?)</script>', html, re.S)
+            if m:
+                ld = json.loads(m.group(1))
+                if ld.get("@type") == "JobPosting" and ld.get("description"):
+                    return ld["description"]
+        except Exception:
+            pass
         return None
     except Exception:
         return None

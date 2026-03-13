@@ -146,7 +146,7 @@ def run(
 
             if new_jobs and use_summaries and browser:
                 for job in new_jobs:
-                    desc = playwright_fetch.fetch_description(browser, job["url"])
+                    desc = job.get("description") or playwright_fetch.fetch_description(browser, job["url"])
                     if desc:
                         if has_sponsorship_restriction(desc):
                             logger.info("[%s] dropped (no sponsorship): %s", job["company"], job["title"])

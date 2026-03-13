@@ -3,8 +3,10 @@ Amazon Jobs scraper using the public search.json API.
 No authentication or Playwright required.
 """
 
+import html as _html
 import json
 import logging
+import re
 from datetime import datetime
 from typing import Iterator
 
@@ -43,6 +45,11 @@ def _resolve_location(j: dict) -> str:
         except (json.JSONDecodeError, AttributeError):
             continue
     return j.get("location", "")
+
+
+def _strip_html(text: str) -> str:
+    text = _html.unescape(text or "")
+    return re.sub(r"<[^>]+>", " ", text).strip()
 
 
 def _is_data_center_role(title: str) -> bool:
@@ -111,6 +118,9 @@ def scrape(company: dict) -> Iterator[dict]:
             if _is_data_center_role(title):
                 continue
             job_path = j.get("job_path", "")
+            desc_parts = [j.get("description", ""), j.get("basic_qualifications", ""), j.get("preferred_qualifications", "")]
+            description = "\n\n".join(_strip_html(p) for p in desc_parts if p)
+
             yield {
                 "company": company_name,
                 "job_id": str(j.get("id_icims") or j.get("id", "")),
@@ -118,6 +128,7 @@ def scrape(company: dict) -> Iterator[dict]:
                 "location": _resolve_location(j),
                 "url": _JOB_BASE + job_path if job_path else "",
                 "posted_date": _parse_date(j.get("posted_date")),
+                "description": description or None,
             }
 
         offset += len(jobs)

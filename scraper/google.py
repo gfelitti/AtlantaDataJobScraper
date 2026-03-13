@@ -4,6 +4,7 @@ No API key, auth, or Playwright required.
 Paginates via ?page=N (20 jobs/page).
 """
 
+import html as _html
 import json
 import logging
 import re
@@ -47,6 +48,16 @@ def _fetch_page(location: str, page: int) -> tuple[list, int]:
     jobs = data[0] or []
     total = data[2] or 0
     return jobs, total
+
+
+def _is_data_center_role(title: str) -> bool:
+    lower = title.lower()
+    return "datacenter" in lower or "data center" in lower
+
+
+def _strip_html(text: str) -> str:
+    text = _html.unescape(text or "")
+    return re.sub(r"<[^>]+>", " ", text).strip()
 
 
 def _ga_location(locations_raw: list) -> str:
@@ -94,11 +105,19 @@ def scrape(company: dict) -> Iterator[dict]:
             break
 
         for j in jobs:
+            if _is_data_center_role(j[1]):
+                continue
             ts = j[12][0] if j[12] else None
             posted_date = (
                 datetime.fromtimestamp(ts, tz=timezone.utc).date().isoformat()
                 if ts else None
             )
+            # j[10] = description, j[3] = preferred qualifications, j[4] = min qualifications
+            desc_parts = [j[10][1] if j[10] and len(j[10]) > 1 else "",
+                          j[4][1] if j[4] and len(j[4]) > 1 else "",
+                          j[3][1] if j[3] and len(j[3]) > 1 else ""]
+            description = "\n\n".join(_strip_html(p) for p in desc_parts if p)
+
             yield {
                 "company": company_name,
                 "job_id": str(j[0]),
@@ -106,6 +125,7 @@ def scrape(company: dict) -> Iterator[dict]:
                 "location": _ga_location(j[9]),
                 "url": _JOB_URL.format(j[0]),
                 "posted_date": posted_date,
+                "description": description or None,
             }
 
         page += 1
