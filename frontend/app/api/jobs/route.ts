@@ -8,7 +8,9 @@ export function GET(req: NextRequest) {
   const company = searchParams.get('company') ?? undefined;
   const search = searchParams.get('search') ?? undefined;
   const active = searchParams.get('active') ?? undefined;
+  const work_authorization = searchParams.get('work_authorization') ?? undefined;
+  const max_years = searchParams.get('max_years') ?? undefined;
 
-  const jobs = getJobs({ company, search, active });
+  const jobs = getJobs({ company, search, active, work_authorization, max_years });
   return NextResponse.json(jobs);
 }

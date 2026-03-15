@@ -17,6 +17,7 @@ SYSTEM = "Return ONLY valid JSON, no markdown, no explanation."
 
 PROMPT = """Extract from this job posting and return a JSON object with exactly these fields:
 - "experience": required years + key skills (string or null)
+- "years_experience": minimum years of experience required as an integer (e.g. 3), or null if not specified
 - "salary": salary or range (string or null)
 - "responsibilities": top 3-4 bullets (array of strings)
 - "benefits": key benefits (array of strings, empty if none)

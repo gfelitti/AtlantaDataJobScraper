@@ -2,22 +2,38 @@
 
 import { useEffect, useRef, useState } from 'react';
 
+const AUTH_OPTIONS = [
+  { value: '', label: 'All' },
+  { value: 'sponsorship_provided', label: 'Sponsorship provided' },
+  { value: 'opt_accepted', label: 'OPT accepted' },
+  { value: 'not_specified', label: 'Not specified' },
+  { value: 'citizen_gc_only', label: 'Citizen / GC only' },
+];
+
 interface Props {
   allCompanies: string[];
   selectedCompanies: string[];
   showActive: boolean;
+  workAuthorization: string;
+  maxYears: string;
   onSearchChange: (value: string) => void;
   onCompanyToggle: (company: string) => void;
   onActiveToggle: () => void;
+  onWorkAuthChange: (value: string) => void;
+  onMaxYearsChange: (value: string) => void;
 }
 
 export default function Filters({
   allCompanies,
   selectedCompanies,
   showActive,
+  workAuthorization,
+  maxYears,
   onSearchChange,
   onCompanyToggle,
   onActiveToggle,
+  onWorkAuthChange,
+  onMaxYearsChange,
 }: Props) {
   const [inputValue, setInputValue] = useState('');
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -53,6 +69,34 @@ export default function Filters({
             </label>
           ))}
         </div>
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Work auth</span>
+        <select
+          value={workAuthorization}
+          onChange={(e) => onWorkAuthChange(e.target.value)}
+          className="px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+        >
+          {AUTH_OPTIONS.map((o) => (
+            <option key={o.value} value={o.value}>{o.label}</option>
+          ))}
+        </select>
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+          Max exp.{maxYears ? ` (≤ ${maxYears} yrs)` : ' (any)'}
+        </span>
+        <input
+          type="range"
+          min="0"
+          max="10"
+          step="1"
+          value={maxYears || '10'}
+          onChange={(e) => onMaxYearsChange(e.target.value === '10' ? '' : e.target.value)}
+          className="w-32 accent-blue-600"
+        />
       </div>
 
       <label className="flex items-center gap-2 text-sm cursor-pointer whitespace-nowrap">

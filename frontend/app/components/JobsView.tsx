@@ -17,6 +17,8 @@ export default function JobsView({ initialJobs, companiesCount }: Props) {
   const [search, setSearch] = useState('');
   const [selectedCompanies, setSelectedCompanies] = useState<string[]>([]);
   const [showActive, setShowActive] = useState(true);
+  const [workAuthorization, setWorkAuthorization] = useState('');
+  const [maxYears, setMaxYears] = useState('');
 
   // Derived from initialJobs — stable, never shrinks as filters change
   const allCompanies = useMemo(
@@ -37,6 +39,8 @@ export default function JobsView({ initialJobs, companiesCount }: Props) {
     if (search) params.set('search', search);
     if (selectedCompanies.length === 1) params.set('company', selectedCompanies[0]);
     if (showActive) params.set('active', '1');
+    if (workAuthorization) params.set('work_authorization', workAuthorization);
+    if (maxYears) params.set('max_years', maxYears);
 
     fetch(`/api/jobs?${params.toString()}`)
       .then((r) => r.json())
@@ -47,7 +51,7 @@ export default function JobsView({ initialJobs, companiesCount }: Props) {
           setJobs(data);
         }
       });
-  }, [search, selectedCompanies, showActive]);
+  }, [search, selectedCompanies, showActive, workAuthorization, maxYears]);
 
   const handleCompanyToggle = useCallback((company: string) => {
     setSelectedCompanies((prev) =>
@@ -78,9 +82,13 @@ export default function JobsView({ initialJobs, companiesCount }: Props) {
         allCompanies={allCompanies}
         selectedCompanies={selectedCompanies}
         showActive={showActive}
+        workAuthorization={workAuthorization}
+        maxYears={maxYears}
         onSearchChange={handleSearchChange}
         onCompanyToggle={handleCompanyToggle}
         onActiveToggle={() => setShowActive((prev) => !prev)}
+        onWorkAuthChange={setWorkAuthorization}
+        onMaxYearsChange={setMaxYears}
       />
 
       <main className="flex-1 overflow-auto">

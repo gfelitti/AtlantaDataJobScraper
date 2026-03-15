@@ -16,10 +16,14 @@ interface GetJobsParams {
   company?: string;
   search?: string;
   active?: string;
+  work_authorization?: string;
+  max_years?: string;
 }
 
+const JOB_COLS = 'id, company, title, location, posted_date, url, is_active, summary, work_authorization, years_experience';
+
 export function getJobById(id: number): Job | null {
-  return (getDb().prepare('SELECT id, company, title, location, posted_date, url, is_active, summary FROM jobs WHERE id = ?').get(id) as Job) ?? null;
+  return (getDb().prepare(`SELECT ${JOB_COLS} FROM jobs WHERE id = ?`).get(id) as Job) ?? null;
 }
 
 export function getCompaniesCount(): number {
@@ -28,7 +32,7 @@ export function getCompaniesCount(): number {
   return (getDb().prepare('SELECT COUNT(DISTINCT company) as count FROM jobs').get() as { count: number }).count;
 }
 
-export function getJobs({ company, search, active }: GetJobsParams = {}): Job[] {
+export function getJobs({ company, search, active, work_authorization, max_years }: GetJobsParams = {}): Job[] {
   const conditions: string[] = [];
   const params: (string | number)[] = [];
 
@@ -47,8 +51,21 @@ export function getJobs({ company, search, active }: GetJobsParams = {}): Job[] 
     params.push(active === '1' ? 1 : 0);
   }
 
+  if (work_authorization) {
+    conditions.push('work_authorization = ?');
+    params.push(work_authorization);
+  }
+
+  if (max_years) {
+    const n = parseInt(max_years, 10);
+    if (!isNaN(n)) {
+      conditions.push('(years_experience IS NULL OR years_experience <= ?)');
+      params.push(n);
+    }
+  }
+
   const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
-  const sql = `SELECT id, company, title, location, posted_date, url, is_active, summary FROM jobs ${where} ORDER BY posted_date DESC`;
+  const sql = `SELECT ${JOB_COLS} FROM jobs ${where} ORDER BY posted_date DESC`;
 
   return getDb().prepare(sql).all(...params) as Job[];
 }

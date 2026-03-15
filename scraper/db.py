@@ -40,7 +40,7 @@ def get_conn(db_path: str):
 def init_db(db_path: str) -> None:
     with get_conn(db_path) as conn:
         conn.executescript(SCHEMA)
-        for col in ("description", "summary", "deactivated_at", "work_authorization"):
+        for col in ("description", "summary", "deactivated_at", "work_authorization", "years_experience"):
             try:
                 conn.execute(f"ALTER TABLE jobs ADD COLUMN {col} TEXT")
             except sqlite3.OperationalError:
@@ -148,6 +148,15 @@ def update_work_authorization(
     conn.execute(
         "UPDATE jobs SET work_authorization=? WHERE company=? AND job_id=?",
         (label, company, job_id),
+    )
+
+
+def update_years_experience(
+    conn: sqlite3.Connection, company: str, job_id: str, years: int | None
+) -> None:
+    conn.execute(
+        "UPDATE jobs SET years_experience=? WHERE company=? AND job_id=?",
+        (years, company, job_id),
     )
 
 

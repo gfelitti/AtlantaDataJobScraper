@@ -7,4 +7,6 @@ export interface Job {
   url: string;
   is_active: number;
   summary: string | null;
+  work_authorization: string | null;
+  years_experience: number | null;
 }

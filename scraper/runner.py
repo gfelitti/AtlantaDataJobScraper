@@ -16,7 +16,7 @@ load_dotenv(Path(__file__).parent.parent / ".env")
 
 from . import aws, avature, generic, google, microsoft, statefarm, workday
 from .config import COMPANIES
-from .db import get_conn, mark_inactive, set_setting, update_description_summary, update_work_authorization, upsert_jobs_batch
+from .db import get_conn, mark_inactive, set_setting, update_description_summary, update_work_authorization, update_years_experience, upsert_jobs_batch
 from .filters import classify_work_authorization, is_atlanta, is_data_role
 
 _VALID_AUTH_LABELS = {"sponsorship_provided", "opt_accepted", "citizen_gc_only", "not_specified"}
@@ -169,19 +169,25 @@ def run(
                     desc = job.get("description") or playwright_fetch.fetch_description(browser, job["url"])
                     if desc:
                         summ = summarizer.summarize(job["title"], job["company"], desc)
-                        # Extract work_authorization from Claude's JSON; fall back to regex
+                        # Extract fields from Claude's JSON; fall back to regex for work_authorization
                         auth_label = classify_work_authorization(desc)
+                        years_exp = None
                         if summ:
                             try:
-                                claude_label = json.loads(summ).get("work_authorization", "")
+                                parsed = json.loads(summ)
+                                claude_label = parsed.get("work_authorization", "")
                                 if claude_label in _VALID_AUTH_LABELS:
                                     auth_label = claude_label
+                                raw_years = parsed.get("years_experience")
+                                if isinstance(raw_years, int) and raw_years >= 0:
+                                    years_exp = raw_years
                             except Exception:
                                 pass
                         with get_conn(db_path) as conn:
                             update_description_summary(conn, job["company"], job["job_id"], desc, summ or "")
                             update_work_authorization(conn, job["company"], job["job_id"], auth_label)
-                        logger.info("[%s] work_authorization=%s: %s", job["company"], auth_label, job["title"])
+                            update_years_experience(conn, job["company"], job["job_id"], years_exp)
+                        logger.info("[%s] work_authorization=%s years=%s: %s", job["company"], auth_label, years_exp, job["title"])
                         if not summ:
                             logger.warning("[%s] summary failed: %s", job["company"], job["title"])
 
