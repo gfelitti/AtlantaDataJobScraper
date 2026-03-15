@@ -21,6 +21,11 @@ PROMPT = """Extract from this job posting and return a JSON object with exactly 
 - "responsibilities": top 3-4 bullets (array of strings)
 - "benefits": key benefits (array of strings, empty if none)
 - "arrangement": "remote", "hybrid", "onsite", or null
+- "work_authorization": one of "sponsorship_provided", "opt_accepted", "citizen_gc_only", "not_specified"
+  - "sponsorship_provided": company explicitly offers H-1B or visa sponsorship
+  - "opt_accepted": OPT/CPT/F-1 accepted but no H-1B sponsorship mentioned
+  - "citizen_gc_only": explicitly requires U.S. citizenship or green card, or states no sponsorship/OPT
+  - "not_specified": no work authorization language found
 
 Job: {title} at {company}
 ---

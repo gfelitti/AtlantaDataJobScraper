@@ -3,6 +3,7 @@ Orchestrator: iterates over companies, dispatches to the correct scraper,
 writes to DB, and runs the is_active sweep per company.
 """
 
+import json
 import logging
 import os
 import sqlite3
@@ -17,6 +18,8 @@ from . import aws, avature, generic, google, microsoft, statefarm, workday
 from .config import COMPANIES
 from .db import get_conn, mark_inactive, set_setting, update_description_summary, update_work_authorization, upsert_jobs_batch
 from .filters import classify_work_authorization, is_atlanta, is_data_role
+
+_VALID_AUTH_LABELS = {"sponsorship_provided", "opt_accepted", "citizen_gc_only", "not_specified"}
 
 logger = logging.getLogger(__name__)
 
@@ -165,16 +168,21 @@ def run(
                 for job in jobs_needing_desc:
                     desc = job.get("description") or playwright_fetch.fetch_description(browser, job["url"])
                     if desc:
-                        auth_label = classify_work_authorization(desc)
-                        with get_conn(db_path) as conn:
-                            update_work_authorization(conn, job["company"], job["job_id"], auth_label)
-                        logger.info("[%s] work_authorization=%s: %s", job["company"], auth_label, job["title"])
                         summ = summarizer.summarize(job["title"], job["company"], desc)
+                        # Extract work_authorization from Claude's JSON; fall back to regex
+                        auth_label = classify_work_authorization(desc)
+                        if summ:
+                            try:
+                                claude_label = json.loads(summ).get("work_authorization", "")
+                                if claude_label in _VALID_AUTH_LABELS:
+                                    auth_label = claude_label
+                            except Exception:
+                                pass
                         with get_conn(db_path) as conn:
                             update_description_summary(conn, job["company"], job["job_id"], desc, summ or "")
-                        if summ:
-                            logger.info("[%s] summarized: %s", job["company"], job["title"])
-                        else:
+                            update_work_authorization(conn, job["company"], job["job_id"], auth_label)
+                        logger.info("[%s] work_authorization=%s: %s", job["company"], auth_label, job["title"])
+                        if not summ:
                             logger.warning("[%s] summary failed: %s", job["company"], job["title"])
 
             results[name] = {
