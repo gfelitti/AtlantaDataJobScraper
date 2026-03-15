@@ -30,6 +30,9 @@ RUN playwright install chromium && playwright install-deps chromium
 COPY scraper/ scraper/
 COPY main.py .
 COPY match_cv.py .
+COPY backfill_summaries.py .
+COPY backfill_years_experience.py .
+COPY migrate_work_authorization.py .
 
 # Frontend (built artifacts + node_modules from builder)
 COPY --from=frontend-builder /build ./frontend
