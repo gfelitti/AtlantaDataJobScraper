@@ -61,6 +61,16 @@ _EXCLUDE_KEYWORDS = [
     "data transcription",
     "data processor",
     "data input",
+    # Non-data roles that match broad keywords (e.g. "analyst", "research scientist")
+    "cybersecurity",
+    "cyber security",
+    "quality assurance",
+    "user experience",
+    "ux designer",
+    "ui designer",
+    "food scientist",
+    "sweetener",
+    "actuarial",
 ]
 
 

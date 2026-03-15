@@ -210,7 +210,8 @@ COMPANIES: list[dict] = [
         "name": "Google",
         "ats": "google",
         "location": "Atlanta, GA, USA",
-        "assume_atlanta": True,
+        # assume_atlanta removed: _ga_location() returns actual location per job;
+        # is_atlanta() filters out non-Atlanta results (e.g. Cambridge, MA)
     },
     # ── Microsoft ────────────────────────────────────────────────────────
     {
@@ -233,7 +234,8 @@ COMPANIES: list[dict] = [
         "ats": "statefarm",
         "state": "Georgia",
         "brand": "State Farm",
-        "assume_atlanta": True,
+        # assume_atlanta removed: API returns city/state per job; Illinois jobs
+        # were slipping through because the Georgia filter on the API side is loose
     },
     # ── EY ───────────────────────────────────────────────────────────────
     {
