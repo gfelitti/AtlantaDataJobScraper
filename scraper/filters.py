@@ -127,25 +127,61 @@ def parse_posted_date(raw: str | None) -> str | None:
     return None
 
 
-_SPONSORSHIP_PATTERNS = re.compile(
-    r"no\s+(opt|cpt|stem[\s/]*opt|visa\s+sponsor)",
+_SPONSORSHIP_PROVIDED = re.compile(
+    r"(will|can|does|do)\s+(provide|offer|support)?\s*sponsor.{0,40}(visa|h[\s-]?1b|work\s+authoriz)"
+    r"|(visa|h[\s-]?1b)\s+(sponsorship\s+)?(is\s+)?(available|provided|offered|supported)"
+    r"|we\s+(do\s+)?sponsor\s+(h[\s-]?1b|visa|work)",
     re.IGNORECASE,
 )
 
-_AUTHORIZATION_PATTERNS = re.compile(
-    r"(must|required)\s+.{0,60}(authorized|eligible)\s+to\s+work\s+in\s+the\s+u\.?s\.?"
-    r"|without\s+(current\s+or\s+future\s+)?sponsorship"
-    r"|sponsorship\s+(is\s+)?(not|unavailable|not\s+available)",
+_OPT_ACCEPTED = re.compile(
+    r"(opt|cpt|stem[\s/]*opt|f[\s-]?1)\s+(is\s+)?(accepted|welcome|eligible|authorized|ok)"
+    r"|(opt|cpt|stem[\s/]*opt|f[\s-]?1)\s+.{0,30}(welcome|accepted|eligible|authorized)"
+    r"|(accept|welcome|consider)\s+.{0,30}(opt|cpt|f[\s-]?1)",
     re.IGNORECASE,
 )
+
+_CITIZEN_GC_ONLY = re.compile(
+    r"no\s+(opt|cpt|stem[\s/]*opt|visa\s+sponsor)"
+    r"|(unable|not\s+able|cannot|can\s+not)\s+to\s+sponsor"
+    r"|(must|required)\s+.{0,60}(authorized|eligible)\s+to\s+work\s+in\s+the\s+u\.?s\.?"
+    r"|without\s+(current\s+or\s+future\s+)?sponsorship"
+    r"|sponsorship\s+(is\s+)?(not|unavailable|not\s+available)"
+    r"|u\.?s\.?\s+citizen(ship)?\s+(or\s+.{0,20})?(required|only|must)"
+    r"|must\s+be\s+a\s+u\.?s\.?\s+citizen"
+    r"|unrestricted\s+(u\.?s\.?\s+)?work\s+authoriz"
+    r"|u\.?s\.?\s+persons?\s+only",
+    re.IGNORECASE,
+)
+
+
+def classify_work_authorization(description: str) -> str:
+    """
+    Classify the work authorization stance of a job description.
+
+    Returns one of:
+        'sponsorship_provided' — company explicitly offers H-1B/visa sponsorship
+        'opt_accepted'         — OPT/CPT accepted but no sponsorship mentioned
+        'citizen_gc_only'      — explicitly excludes visa holders / OPT / sponsorship
+        'not_specified'        — no work authorization language detected
+
+    Order matters: citizen_gc_only is checked before sponsorship_provided to
+    catch phrases like "unable to sponsor" before the general sponsorship pattern.
+    """
+    if not description:
+        return "not_specified"
+    if _CITIZEN_GC_ONLY.search(description):
+        return "citizen_gc_only"
+    if _SPONSORSHIP_PROVIDED.search(description):
+        return "sponsorship_provided"
+    if _OPT_ACCEPTED.search(description):
+        return "opt_accepted"
+    return "not_specified"
 
 
 def has_sponsorship_restriction(description: str) -> bool:
-    """Return True if the job description explicitly excludes visa sponsorship / OPT/CPT."""
-    return bool(
-        _SPONSORSHIP_PATTERNS.search(description)
-        or _AUTHORIZATION_PATTERNS.search(description)
-    )
+    """Deprecated — use classify_work_authorization() instead."""
+    return classify_work_authorization(description) == "citizen_gc_only"
 
 
 def is_atlanta(location: str | None) -> bool:
