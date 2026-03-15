@@ -135,22 +135,28 @@ _SPONSORSHIP_PROVIDED = re.compile(
 )
 
 _OPT_ACCEPTED = re.compile(
+    # Positive OPT signals
     r"(opt|cpt|stem[\s/]*opt|f[\s-]?1)\s+(is\s+)?(accepted|welcome|eligible|authorized|ok)"
     r"|(opt|cpt|stem[\s/]*opt|f[\s-]?1)\s+.{0,30}(welcome|accepted|eligible|authorized)"
-    r"|(accept|welcome|consider)\s+.{0,30}(opt|cpt|f[\s-]?1)",
+    r"|(accept|welcome|consider)\s+.{0,30}(opt|cpt|f[\s-]?1)"
+    # "No sponsorship but OPT OK" — company won't sponsor but doesn't exclude OPT
+    r"|(will\s+not|does\s+not|cannot|unable\s+to)\s+.{0,20}(offer|provide)?\s*(sponsorship|sponsor\s+.{0,20}(visa|h[\s-]?1b|employment))"
+    r"|must\s+not\s+require.{0,60}sponsorship"
+    r"|(must|required)\s+.{0,60}(authorized|eligible)\s+to\s+work\s+in\s+the\s+u\.?s\.?"
+    r"|without\s+(current\s+or\s+future\s+)?sponsorship"
+    r"|sponsorship\s+(is\s+)?(not|unavailable|not\s+available)",
     re.IGNORECASE,
 )
 
 _CITIZEN_GC_ONLY = re.compile(
-    r"no\s+(opt|cpt|stem[\s/]*opt|visa\s+sponsor)"
-    r"|(unable|not\s+able|cannot|can\s+not)\s+to\s+sponsor"
-    r"|(must|required)\s+.{0,60}(authorized|eligible)\s+to\s+work\s+in\s+the\s+u\.?s\.?"
-    r"|without\s+(current\s+or\s+future\s+)?sponsorship"
-    r"|sponsorship\s+(is\s+)?(not|unavailable|not\s+available)"
+    # Explicit OPT/CPT exclusion
+    r"no\s+(opt|cpt|stem[\s/]*opt)"
+    # Citizenship / permanent residency required
     r"|u\.?s\.?\s+citizen(ship)?\s+(or\s+.{0,20})?(required|only|must)"
     r"|must\s+be\s+a\s+u\.?s\.?\s+citizen"
-    r"|unrestricted\s+(u\.?s\.?\s+)?work\s+authoriz"
-    r"|u\.?s\.?\s+persons?\s+only",
+    r"|u\.?s\.?\s+persons?\s+only"
+    # Unrestricted = permanent authorization (excludes OPT which is time-limited)
+    r"|unrestricted\s+(u\.?s\.?\s+)?work\s+authoriz",
     re.IGNORECASE,
 )
 

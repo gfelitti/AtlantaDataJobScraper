@@ -24,9 +24,10 @@ PROMPT = """Extract from this job posting and return a JSON object with exactly 
 - "arrangement": "remote", "hybrid", "onsite", or null
 - "work_authorization": one of "sponsorship_provided", "opt_accepted", "citizen_gc_only", "not_specified"
   - "sponsorship_provided": company explicitly offers H-1B or visa sponsorship
-  - "opt_accepted": OPT/CPT/F-1 accepted but no H-1B sponsorship mentioned
-  - "citizen_gc_only": explicitly requires U.S. citizenship or green card, or states no sponsorship/OPT
+  - "opt_accepted": company will NOT sponsor H-1B/visas but does NOT explicitly exclude OPT/CPT — candidates on OPT are currently authorized to work and do not require sponsorship, so they qualify. Examples: "will not offer sponsorship", "must be currently authorized to work", "does not sponsor employment visas"
+  - "citizen_gc_only": explicitly excludes OPT/CPT, OR requires U.S. citizenship or permanent residency, OR requires unrestricted/permanent work authorization. Examples: "no OPT", "no CPT", "must be a U.S. citizen", "U.S. persons only", "unrestricted work authorization required"
   - "not_specified": no work authorization language found
+  IMPORTANT: "will not sponsor" or "must be currently authorized" WITHOUT explicitly saying "no OPT/CPT" should be "opt_accepted", not "citizen_gc_only". OPT holders ARE currently authorized to work.
 
 Job: {title} at {company}
 ---
