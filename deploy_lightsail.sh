@@ -101,7 +101,7 @@ SSH="ssh -i $SSH_KEY -o StrictHostKeyChecking=no -o SendEnv=none ec2-user@$INSTA
 
 # ── 5. Build image locally and transfer ──────────────────────────────────────
 echo "==> Building Docker image locally (linux/amd64)..."
-docker build --platform linux/amd64 -t "$IMAGE_NAME" .
+docker build --no-cache --platform linux/amd64 -t "$IMAGE_NAME" .
 
 echo "==> Transferring image to instance (this may take a few minutes)..."
 docker save "$IMAGE_NAME" | gzip | ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no "ec2-user@$INSTANCE_IP" \
