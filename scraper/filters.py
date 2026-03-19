@@ -43,15 +43,13 @@ KEYWORDS = [
     "quantitative analyst",
     "statistician",
     # MSBA-aligned roles
-    "business analyst",
-    "product manager",
     "product analyst",
     "product associate",
+    "data product manager",
     "supply chain analytics",
     "revenue operations analyst",
+    "data consultant",
     "analytics consultant",
-    "senior consultant",
-    "senior analyst",
 ]
 
 # Companies confirmed by hiring teams to not offer sponsorship.
