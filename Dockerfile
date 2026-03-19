@@ -38,7 +38,7 @@ COPY migrate_work_authorization.py .
 COPY --from=frontend-builder /build ./frontend
 
 # Cron: run scraper daily at 7 AM UTC (env vars passed via /etc/environment)
-RUN echo '0 7 * * * . /etc/environment; cd /app && python3 main.py --all --db "$DB_PATH" >> /var/log/scraper.log 2>&1' | crontab -
+RUN echo '0 7 * * * . /etc/environment; cd /app && /usr/local/bin/python3 main.py --all --db "$DB_PATH" >> /var/log/scraper.log 2>&1' | crontab -
 
 COPY start.sh .
 RUN chmod +x start.sh
