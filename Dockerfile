@@ -33,6 +33,7 @@ COPY match_cv.py .
 COPY backfill_summaries.py .
 COPY backfill_years_experience.py .
 COPY migrate_work_authorization.py .
+COPY cleanup_titles.py .
 
 # Frontend (built artifacts + node_modules from builder)
 COPY --from=frontend-builder /build ./frontend
