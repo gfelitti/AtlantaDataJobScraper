@@ -17,7 +17,7 @@ load_dotenv(Path(__file__).parent.parent / ".env")
 from . import aws, avature, generic, google, microsoft, statefarm, workday
 from .config import COMPANIES
 from .db import get_conn, mark_inactive, set_setting, update_description_summary, update_work_authorization, update_years_experience, upsert_jobs_batch
-from .filters import classify_work_authorization, is_atlanta, is_data_role
+from .filters import CITIZEN_GC_ONLY_COMPANIES, classify_work_authorization, is_atlanta, is_data_role
 
 _VALID_AUTH_LABELS = {"sponsorship_provided", "opt_accepted", "citizen_gc_only", "not_specified"}
 
@@ -183,6 +183,9 @@ def run(
                                     years_exp = raw_years
                             except Exception:
                                 pass
+                        # Hardcoded override: hiring team confirmed no sponsorship for these companies
+                        if name in CITIZEN_GC_ONLY_COMPANIES:
+                            auth_label = "citizen_gc_only"
                         with get_conn(db_path) as conn:
                             update_description_summary(conn, job["company"], job["job_id"], desc, summ or "")
                             update_work_authorization(conn, job["company"], job["job_id"], auth_label)

@@ -28,6 +28,7 @@ PROMPT = """Extract from this job posting and return a JSON object with exactly 
   - "citizen_gc_only": explicitly excludes OPT/CPT, OR requires U.S. citizenship or permanent residency, OR requires unrestricted/permanent work authorization. Examples: "no OPT", "no CPT", "must be a U.S. citizen", "U.S. persons only", "unrestricted work authorization required"
   - "not_specified": no work authorization language found
   IMPORTANT: "will not sponsor" or "must be currently authorized" WITHOUT explicitly saying "no OPT/CPT" should be "opt_accepted", not "citizen_gc_only". OPT holders ARE currently authorized to work.
+  COMPANY OVERRIDE: If the company is Coca-Cola, Children's Healthcare of Atlanta, or Delta, always return "citizen_gc_only" — confirmed by hiring teams regardless of job description language.
 
 Job: {title} at {company}
 ---

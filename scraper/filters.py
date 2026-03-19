@@ -6,17 +6,15 @@ No side effects.
 import re
 
 KEYWORDS = [
-    # Core data/analytics
-    "analyst",
-    "analytics",
+    # Core data roles
     "data engineer",
     "data scientist",
-    "data architect",
     "data analyst",
+    "data analytics",
+    "data architect",
     "data manager",
     "data quality",
     "data governance",
-    "data steward",
     "data modeler",
     "database administrator",
     "database developer",
@@ -25,7 +23,6 @@ KEYWORDS = [
     "ml engineer",
     "ai engineer",
     "applied scientist",
-    "research scientist",
     "decision science",
     "deep learning",
     "computer vision",
@@ -37,20 +34,34 @@ KEYWORDS = [
     "bi developer",
     "bi engineer",
     "reporting analyst",
-    "reporting engineer",
     "insights analyst",
-    "insights manager",
-    "insights engineer",
+    # Tools
     "tableau",
     "power bi",
     "looker",
-    # Quantitative / Stats
-    "quantitative",
+    # Quantitative
+    "quantitative analyst",
     "statistician",
-    "econometri",
-    # Broad catch-all (last — lower priority)
-    "data",
+    # MSBA-aligned roles
+    "business analyst",
+    "product manager",
+    "product analyst",
+    "product associate",
+    "supply chain analytics",
+    "revenue operations analyst",
+    "analytics consultant",
+    "senior consultant",
+    "senior analyst",
 ]
+
+# Companies confirmed by hiring teams to not offer sponsorship.
+# work_authorization is hardcoded to "citizen_gc_only" regardless of job description.
+# Must match company names exactly as defined in config.py.
+CITIZEN_GC_ONLY_COMPANIES = {
+    "Coca-Cola",
+    "Children's Healthcare of Atlanta",
+    "Delta",
+}
 
 _EXCLUDE_KEYWORDS = [
     "data entry",
