@@ -46,7 +46,7 @@ KEYWORDS = [
     # MSBA-aligned roles
     "data product manager",
     "product analytics",
-    "data & analytics",
+    "& analytics",
     "supply chain analytics",
     "data consultant",
     "analytics consultant",
