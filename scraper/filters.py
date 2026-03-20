@@ -47,6 +47,7 @@ KEYWORDS = [
     "data product manager",
     "product analytics",
     "& analytics",
+    "and analytics",
     "supply chain analytics",
     "data consultant",
     "analytics consultant",
