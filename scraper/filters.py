@@ -9,6 +9,7 @@ KEYWORDS = [
     # Core data roles
     "data engineer",
     "data scientist",
+    "data science",
     "data analyst",
     "data analytics",
     "data architect",
@@ -44,6 +45,8 @@ KEYWORDS = [
     "statistician",
     # MSBA-aligned roles
     "data product manager",
+    "product analytics",
+    "data & analytics",
     "supply chain analytics",
     "data consultant",
     "analytics consultant",
