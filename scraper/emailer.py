@@ -1,10 +1,10 @@
 """
-Email digest: sends an HTML summary of newly inserted jobs via SendGrid.
+Email digest: sends an HTML summary of newly inserted jobs via Resend.
 
 Required env vars:
-    SENDGRID_API_KEY  — SendGrid API key
-    EMAIL_FROM        — verified sender address
-    EMAIL_TO          — recipient address (comma-separated for multiple)
+    RESEND_API_KEY      — Resend API key
+    EMAIL_FROM          — verified sender address
+    RESEND_AUDIENCE_ID  — Resend Audience ID; recipients fetched from this list
 """
 
 import logging
@@ -99,17 +99,33 @@ def _build_html(new_jobs_by_company: dict[str, list[dict]], run_date: str) -> st
 </html>"""
 
 
+def _get_audience_recipients(resend, api_key: str, audience_id: str) -> list[str]:
+    """Fetch subscribed contacts from a Resend Audience."""
+    resend.api_key = api_key
+    try:
+        response = resend.Contacts.list(audience_id=audience_id)
+        contacts = response.get("data", [])
+        emails = [c["email"] for c in contacts if not c.get("unsubscribed", False)]
+        logger.info("Fetched %d subscribed contacts from audience %s", len(emails), audience_id)
+        return emails
+    except Exception as exc:
+        logger.error("Failed to fetch audience contacts: %s", exc)
+        return []
+
+
 def send_digest(new_jobs_by_company: dict[str, list[dict]]) -> bool:
     """
     Send the daily digest email. Returns True on success.
-    Skips silently if RESEND_API_KEY / EMAIL_FROM / EMAIL_TO are not set.
+    Recipients are fetched from RESEND_AUDIENCE_ID.
+    Falls back to EMAIL_TO if RESEND_AUDIENCE_ID is not set.
     """
     api_key = os.environ.get("RESEND_API_KEY", "")
     email_from = os.environ.get("EMAIL_FROM", "")
+    audience_id = os.environ.get("RESEND_AUDIENCE_ID", "")
     email_to_raw = os.environ.get("EMAIL_TO", "")
 
-    if not all([api_key, email_from, email_to_raw]):
-        logger.info("Email digest skipped: RESEND_API_KEY / EMAIL_FROM / EMAIL_TO not configured.")
+    if not all([api_key, email_from]):
+        logger.info("Email digest skipped: RESEND_API_KEY / EMAIL_FROM not configured.")
         return False
 
     total = sum(len(jobs) for jobs in new_jobs_by_company.values())
@@ -123,11 +139,18 @@ def send_digest(new_jobs_by_company: dict[str, list[dict]]) -> bool:
         logger.error("resend package not installed. Run: pip install resend")
         return False
 
+    if audience_id:
+        recipients = _get_audience_recipients(resend, api_key, audience_id)
+    else:
+        recipients = [e.strip() for e in email_to_raw.split(",") if e.strip()]
+
+    if not recipients:
+        logger.warning("Email digest skipped: no recipients.")
+        return False
+
     run_date = date.today().strftime("%B %d, %Y")
     html = _build_html(new_jobs_by_company, run_date)
     subject = f"JobScraper: {total} new data role{'s' if total != 1 else ''} — {run_date}"
-
-    recipients = [e.strip() for e in email_to_raw.split(",") if e.strip()]
 
     try:
         resend.api_key = api_key
@@ -137,7 +160,7 @@ def send_digest(new_jobs_by_company: dict[str, list[dict]]) -> bool:
             "subject": subject,
             "html": html,
         })
-        logger.info("Digest sent to %s", recipients)
+        logger.info("Digest sent to %d recipients", len(recipients))
         return True
     except Exception as exc:
         logger.error("Failed to send digest: %s", exc)
