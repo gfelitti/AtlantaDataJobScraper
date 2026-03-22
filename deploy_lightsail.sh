@@ -123,8 +123,8 @@ $SSH "
     -v $DATA_DIR/uploads:/tmp \
     -e ANTHROPIC_API_KEY='$API_KEY' \
     -e RESEND_API_KEY='${RESEND_API_KEY:-}' \
+    -e RESEND_AUDIENCE_ID='${RESEND_AUDIENCE_ID:-}' \
     -e EMAIL_FROM='${EMAIL_FROM:-}' \
-    -e EMAIL_TO='${EMAIL_TO:-}' \
     -e DB_PATH=$DATA_DIR/jobs.db \
     -e PORT=$PORT \
     $IMAGE_NAME
